@@ -60,7 +60,7 @@ from kerastuner import RandomSearch
 from kerastuner.engine.hyperparameters import HyperParameters
 ```
 
-### Loading the Data
+### 1. Loading the Data
 * The image dataset used for this CNN model is gotten by extracting the spectogram of each audio data using [librosa](/https://librosa.org/doc/latest/index.html) - a is a python package for music and audio analysis.in the dataset and saving each data in a genre to a different folder
   ``` python
   X = librosa.stft(x)
@@ -73,32 +73,32 @@ from kerastuner.engine.hyperparameters import HyperParameters
   - Converts the categorical labels to numerical labels and assign to respective array
   ``` python
     def structure_dataset(gdrive_path):
-  categories = 'blues classical country disco hiphop jazz metal pop reggae rock'.split()
-  data = []
-  label = []
+      categories = 'blues classical country disco hiphop jazz metal pop reggae rock'.split()
+      data = []
+      label = []
 
-  for x in categories:
-      path = gdrive_path + f'/{x}' + '/*.png' 
-      #used to check for extensions in folders
-      for file in glob.glob(path):
-        #reading the image and converting to greyscale
-        img = cv.imread(file, cv.IMREAD_GRAYSCALE)
+      for x in categories:
+        path = gdrive_path + f'/{x}' + '/*.png' 
+        #used to check for extensions in folders
+        for file in glob.glob(path):
+          #reading the image and converting to greyscale
+          img = cv.imread(file, cv.IMREAD_GRAYSCALE)
 
-        #Resizing images
-        IMG_SIZE = 350
-        image = cv.resize(img, (IMG_SIZE, IMG_SIZE))
+          #Resizing images
+          IMG_SIZE = 350
+          image = cv.resize(img, (IMG_SIZE, IMG_SIZE))
 
-        #Appends the image to the container holding the newly sized images
-        data.append(image)
+          #Appends the image to the container holding the newly sized images
+          data.append(image)
         
-        #Converts image to an array
-        X = np.asarray(data)
+          #Converts image to an array
+          X = np.asarray(data)
         
-        #Appends array for each image to a container
-        label.append(x)
+          #Appends array for each image to a container
+          label.append(x)
         
-        #Giving a numeric label to categories of image dataset
-        label_dict = {
+          #Giving a numeric label to categories of image dataset
+          label_dict = {
             'blues': 0,
             'classical': 1,
             'country': 2,
@@ -109,28 +109,78 @@ from kerastuner.engine.hyperparameters import HyperParameters
             'pop': 7,
             'reggae': 8,
             'rock': 9,
-        }
+          }
         
-        #mapping the image labels and the numeric labels created
-        y = np.array(list(map(label_dict.get, label)))
-  return X, y
+          #mapping the image labels and the numeric labels created
+          y = np.array(list(map(label_dict.get, label)))
+      return X, y
   ```
-## 1. Exploratory Data Analysis
-* Stuff used
-### Data Engineering; Ensuring data is ready for training
-* Stuff used
-## 2. Model Training
-* Separating Labels from Features
-* Splitting data
-## 3. Model Comparison
-* Separating Labels from Features
-* Splitting data
-## 4. Model Tuning
-* Separating Labels from Features
-* Splitting data
-## 5. Model Evaluation
-* Separating Labels from Features
-* Splitting data
+
+### 2. Model Preparation
+  ```python
+     scores = []
+     actual = []
+     preds = []
+     
+     def evaluate_model(X, y):
+        kfold = StratifiedKFold(n_splits=10, random_state=random.seed(101), shuffle=True)
+        current_fold = 0
+        for train, test in kfold.split(X,y):
+          current_fold += 1
+          print('Training fold %d' % current_fold)
+          
+          model = build_model()
+      
+          train_X, train_y, test_X, test_y = X[train], y[train], X[test], y[test]
+
+          #Extract a 20% slot from training set for validation
+          tr, val = next(StratifiedKFold(n_splits=5, shuffle=True).split(train_X, train_y))
+          tr_X, tr_y, val_X, val_y = train_X[tr], train_y[tr], train_X[val], train_y[val]
+
+          Es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10, restore_best_weights=True)
+
+          history = model.fit(tr_X, tr_y, epochs=100, batch_size=50, validation_data=(val_X, val_y), verbose=0, callbacks=[Es])
+      
+          _, acc = model.evaluate(test_X, test_y, verbose=0)
+
+          print('>> %.3f' % (acc * 100.0))
+
+          scores.append(acc)
+          preds.append(history)
+        
+        print("%.2f%% (+/- %.2f%%)" % (np.mean(scores), np.std(scores)))
+        return scores, preds
+  ```
+## 3. Model Plots
+``` python
+  def summarize(histories):
+    for i in range(len(histories)):
+      plt.figure()
+      plt.subplot(211)
+      plt.title('Cross Entropy Loss')
+      plt.plot(histories[i].history['loss'], color='blue', label='train')
+      plt.plot(histories[i].history['val_loss'], color='red', label='val')
+
+      plt.subplot(212)
+      plt.title('Classification Accuracy')
+      plt.plot(histories[i].history['accuracy'], color='blue', label='train')
+      plt.plot(histories[i].history['val_loss'], color='red', label='val')
+      plt.show()
+```
+## 4. Model Performance
+```python
+  def summarize_performance(scores):
+    print('Accuracy: mean=%.3f std=%.3f, n=%d' % (np.mean(scores)*100, np.std(scores)*100, len(scores)))
+    plt.boxplot(scores)
+    plt.show()
+```
+## 5. Run Model
+```python
+  def run():
+    scores, histories = evaluate_model(X, y)
+    summarize(histories)
+    summarize_performance(scores)
+```
 ## 6. Further tasks
 * Separating Labels from Features
 * Splitting data
