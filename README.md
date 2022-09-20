@@ -14,8 +14,15 @@ The motivation behind this study is to achieve a better score for the accuracy m
 ### What is our data
 * I have choosen the famous GTZAN dataset which is available on kaggle at https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification
 ### Libraries and Dependencies
-* I have listed all necessary libraries and dependencies needed for this project.
+* I will be utilizing google collab on this project and mounting the dataset on Google drive. Also, I have listed all necessary libraries and dependencies needed for this project.
+#### Mounting drive
+* The spectogram of the music data (visual representation of the spectrum of frequencies of sound or other signals as they vary with time) which is also present in the dataset on kaggle at https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification was saved to a folder in the google drive and loaded from there
+``` python
+from google.colab import drive
+drive.mount('/content/gdrive')
+```
 
+#### Importing necessary libraries
 ``` python
 import cv2 as cv
 import numpy as np
@@ -53,8 +60,61 @@ from kerastuner import RandomSearch
 from kerastuner.engine.hyperparameters import HyperParameters
 ```
 
-### Getting the Data
-* Stuff used
+### Loading the Data
+* The image dataset used for this CNN model is gotten by extracting the spectogram of each audio data using [librosa](/https://librosa.org/doc/latest/index.html) - a is a python package for music and audio analysis.in the dataset and saving each data in a genre to a different folder
+  ``` python
+  X = librosa.stft(x)
+  Xdb = librosa.amplitude_to_db(abs(X))
+  ```
+* The function below perfomrsa the follow task:
+  - Loads the data from the storage 
+  - Resizes each image and converts each data to greyscale - to reduce computational cost
+  - Converts images to an array and appends to a container 
+  - Converts the categorical labels to numerical labels and assign to respective array
+  ``` python
+    def structure_dataset(gdrive_path):
+  categories = 'blues classical country disco hiphop jazz metal pop reggae rock'.split()
+  data = []
+  label = []
+
+  for x in categories:
+      path = gdrive_path + f'/{x}' + '/*.png' 
+      #used to check for extensions in folders
+      for file in glob.glob(path):
+        #reading the image and converting to greyscale
+        img = cv.imread(file, cv.IMREAD_GRAYSCALE)
+
+        #Resizing images
+        IMG_SIZE = 350
+        image = cv.resize(img, (IMG_SIZE, IMG_SIZE))
+
+        #Appends the image to the container holding the newly sized images
+        data.append(image)
+        
+        #Converts image to an array
+        X = np.asarray(data)
+        
+        #Appends array for each image to a container
+        label.append(x)
+        
+        #Giving a numeric label to categories of image dataset
+        label_dict = {
+            'blues': 0,
+            'classical': 1,
+            'country': 2,
+            'disco': 3,
+            'hiphop': 4,
+            'jazz': 5,
+            'metal': 6,
+            'pop': 7,
+            'reggae': 8,
+            'rock': 9,
+        }
+        
+        #mapping the image labels and the numeric labels created
+        y = np.array(list(map(label_dict.get, label)))
+  return X, y
+  ```
 ## 1. Exploratory Data Analysis
 * Stuff used
 ### Data Engineering; Ensuring data is ready for training
