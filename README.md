@@ -118,6 +118,7 @@ from kerastuner.engine.hyperparameters import HyperParameters
 
 ### 2. Model Preparation
   The preparation of the model makes sure the data is model ready and all processes needed to make this happen occurs in this step. Actions including;
+  - Reshaping the data to ensure uniformity across all dataset to reduce image dataset to a size that prevents a high computational cost in a case where we have a large frames of images
   - Splitting the data set into chunks to have a set for training the model and another for testing evalutaing the tested model: The approach used in this project is the [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html) and a subsequent extraction of 20% of the training data for validation. This approach was used considering the small size of the dataset. In a case of large dataset, the conventional [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html) would have been preferred
   - [Early stopping](https://keras.io/api/callbacks/early_stopping/), a monitor, was introduced to check and stop the training process of every epoch to get the best model based on preset parameters.
   - Using the [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html), the model was 
@@ -125,6 +126,8 @@ from kerastuner.engine.hyperparameters import HyperParameters
      - Evaluated to adjust parameters on 16% of the dataset
      - Tested on 20% of the dataset
   ```python
+     X = X.reshape(len(X), 350, 350, 1)
+     
      scores = []
      actual = []
      preds = []
@@ -159,7 +162,7 @@ from kerastuner.engine.hyperparameters import HyperParameters
         return scores, preds
   ```
 ## 3. Model Plots
-  Visual representation of t
+  Visual representation of every epoch of the training process gives a view as to how each [metric](/https://www.baeldung.com/cs/ml-loss-accuracy) fairs during the training of the model.
 ``` python
   def summarize(histories):
     for i in range(len(histories)):
@@ -175,19 +178,22 @@ from kerastuner.engine.hyperparameters import HyperParameters
       plt.plot(histories[i].history['val_loss'], color='red', label='val')
       plt.show()
 ```
-## 4. Model Performance
-```python
-  def summarize_performance(scores):
-    print('Accuracy: mean=%.3f std=%.3f, n=%d' % (np.mean(scores)*100, np.std(scores)*100, len(scores)))
-    plt.boxplot(scores)
-    plt.show()
-```
-## 5. Run Model
+
+## 4. Run Model
 ```python
   def run():
     scores, histories = evaluate_model(X, y)
     summarize(histories)
     summarize_performance(scores)
+```
+## 5. Model Performance
+```python
+  def summarize_performance(scores):
+    print('Accuracy: mean=%.3f std=%.3f, n=%d' % (np.mean(scores)*100, np.std(scores)*100, len(scores)))
+    plt.boxplot(scores)
+    plt.show()
+    
+    ![image](https://user-images.githubusercontent.com/74769683/191415718-21505a75-d147-4480-86c9-7f9a6da4c370.png)
 ```
 ## 6. Further tasks
 * Separating Labels from Features
