@@ -180,6 +180,7 @@ from kerastuner.engine.hyperparameters import HyperParameters
 ```
 
 ## 4. Run Model
+  This function runs the model and summarizes the scores and the histories
 ```python
   def run():
     scores, histories = evaluate_model(X, y)
@@ -187,15 +188,34 @@ from kerastuner.engine.hyperparameters import HyperParameters
     summarize_performance(scores)
 ```
 ## 5. Model Performance
+  A summary of the model's performance is shown below where it could be seen that the mean of accuracies of each epoch is recorded to be 38%, this is a weak score and thus requires adjustment. Additional approach to mitigate this poor score is discussed in the next section.
 ```python
   def summarize_performance(scores):
     print('Accuracy: mean=%.3f std=%.3f, n=%d' % (np.mean(scores)*100, np.std(scores)*100, len(scores)))
     plt.boxplot(scores)
     plt.show()
-    
 ```
-    ![image](https://drive.google.com/file/d/17AKNwCi5rvXq1BxAJmBKRgCZMYpJeTOz/view?usp=sharing/to/Capture.PNG)
+  ![alt text](https://github.com/omotayoofere/Muisc_Information_Retrieval/blob/main/Capture.PNG "Model Summary")
+  
 ## 6. Further tasks
-* Separating Labels from Features
-* Splitting data
+* Augumenting the image data by creating various shades of the original images thus, adding more variation to the image dataset.
+  ```python
+  #An approach to augument data by presenting different form of the data to the model
+  datagen = ImageDataGenerator(
+        featurewise_center=False,  # set input mean to 0 over the dataset
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        samplewise_std_normalization=False,  # divide each input by its std
+        zca_whitening=False,  # apply ZCA whitening
+        #rotation_range = 30,  # randomly rotate images in the range (degrees, 0 to 180)
+        zoom_range = 0.2, # Randomly zoom image 
+        width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+        height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+        #horizontal_flip = True,  # randomly flip images
+        vertical_flip=False)  # randomly flip images
 
+  datagen.fit(X)
+  ```
+* Tuning HyperParameter: This approach runs and simulates the best model (one that gets the best measurement metric) doing the heavy lifting, making the remaining tweaks easy to perform during model training.
+  ```python
+  ```
