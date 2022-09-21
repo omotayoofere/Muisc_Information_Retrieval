@@ -12,11 +12,11 @@ The motivation behind this study is to achieve a better score for the accuracy m
 ### Problem Definition
 * In this project, we will be exploring multi-class classification, that is, categorizing each music sample into either of the ten (10) labels available. 
 ### What is our data
-* I have choosen the famous GTZAN dataset which is available on kaggle at https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification
+* I have choosen the famous GTZAN dataset which is available on [kaggle](/https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification)
 ### Libraries and Dependencies
 * I will be utilizing google collab on this project and mounting the dataset on Google drive. Also, I have listed all necessary libraries and dependencies needed for this project.
 #### Mounting drive
-* The spectogram of the music data (visual representation of the spectrum of frequencies of sound or other signals as they vary with time) which is also present in the dataset on kaggle at https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification was saved to a folder in the google drive and loaded from there
+* The spectogram of the music data (visual representation of the spectrum of frequencies of sound or other signals as they vary with time) which is also present in the dataset on [kaggle](/https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification) was saved to a folder in the google drive and loaded from there
 ``` python
 from google.colab import drive
 drive.mount('/content/gdrive')
@@ -117,6 +117,13 @@ from kerastuner.engine.hyperparameters import HyperParameters
   ```
 
 ### 2. Model Preparation
+  The preparation of the model makes sure the data is model ready and all processes needed to make this happen occurs in this step. Actions including;
+  - Splitting the data set into chunks to have a set for training the model and another for testing evalutaing the tested model: The approach used in this project is the [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html) and a subsequent extraction of 20% of the training data for validation. This approach was used considering the small size of the dataset. In a case of large dataset, the conventional [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html) would have been preferred
+  - [Early stopping](https://keras.io/api/callbacks/early_stopping/), a monitor, was introduced to check and stop the training process of every epoch to get the best model based on preset parameters.
+  - Using the [k-fold cross validation](/https://scikit-learn.org/stable/modules/cross_validation.html), the model was 
+     - Trained on 64% of the dataset
+     - Evaluated to adjust parameters on 16% of the dataset
+     - Tested on 20% of the dataset
   ```python
      scores = []
      actual = []
@@ -152,6 +159,7 @@ from kerastuner.engine.hyperparameters import HyperParameters
         return scores, preds
   ```
 ## 3. Model Plots
+  Visual representation of t
 ``` python
   def summarize(histories):
     for i in range(len(histories)):
