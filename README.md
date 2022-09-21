@@ -193,8 +193,8 @@ from kerastuner.engine.hyperparameters import HyperParameters
     plt.boxplot(scores)
     plt.show()
     
-    ![image](https://user-images.githubusercontent.com/74769683/191415718-21505a75-d147-4480-86c9-7f9a6da4c370.png)
 ```
+    ![image](https://drive.google.com/file/d/17AKNwCi5rvXq1BxAJmBKRgCZMYpJeTOz/view?usp=sharing/to/Capture.PNG)
 ## 6. Further tasks
 * Separating Labels from Features
 * Splitting data
